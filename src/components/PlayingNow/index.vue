@@ -1,43 +1,21 @@
 <template>
   <div class="movies_body">
     <ul>
-      <li>
+      <li v-for="item in movieList" :key="item.id">
         <div class="pic_show">
-          <img
-            src="http://p1.meituan.net/128.180/movie/967b253953bc7e660cfadbf9d78f67b62852693.jpg"
-          />
+          <img :src="item.img | setWH('128.180')" />
         </div>
         <div class="info_list">
           <h2>
-            误杀
-            <img src alt />
+            {{item.nm}}
+            <img v-if="item.version" src="@/assets/max.png" />
           </h2>
           <p>
             观众评
-            <span class="grade">9.5</span>
+            <span class="grade">{{ item.sc }}</span>
           </p>
-          <p>主演：肖央,谭卓,陈冲</p>
-          <p>今天暂无场次</p>
-        </div>
-        <div class="btn btn_mall">购票</div>
-      </li>
-      <li>
-        <div class="pic_show">
-          <img
-            src="http://p1.meituan.net/128.180/movie/967b253953bc7e660cfadbf9d78f67b62852693.jpg"
-          />
-        </div>
-        <div class="info_list">
-          <h2>
-            误杀
-            <img src alt />
-          </h2>
-          <p>
-            观众评
-            <span class="grade">9.5</span>
-          </p>
-          <p>主演：肖央,谭卓,陈冲</p>
-          <p>今天暂无场次</p>
+          <p>主演：{{ item.star }}</p>
+          <p>{{ item.showInfo }}</p>
         </div>
         <div class="btn btn_mall">购票</div>
       </li>
@@ -49,9 +27,18 @@
 export default {
   name: "playingNow",
   data() {
-    return {};
+    return {
+      movieList: []
+    };
   },
-  components: {}
+  mounted() {
+    this.axios.get("/api/movieOnInfoList?cityId=10").then(res => {
+      var msg = res.data.msg;
+      if (msg === "ok") {
+        this.movieList = res.data.data.movieList;
+      }
+    });
+  }
 };
 </script>
 

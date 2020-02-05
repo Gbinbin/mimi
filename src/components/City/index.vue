@@ -4,51 +4,25 @@
       <div class="hot_city">
         <h2>热门城市</h2>
         <ul class="clearfix">
-          <li>Ad放到</li>
-          <li>Ad放到</li>
-          <li>Ad放到</li>
+          <li v-for="item in hotList" :key="item.id">{{item.nm}}</li>
         </ul>
       </div>
-      <div class="city_sort">
-        <div>
-          <h2>A</h2>
+      <div class="city_sort" ref="city_sort">
+        <div v-for="item in cityList" :key="item.index">
+          <h2>{{item.index}}</h2>
           <ul>
-            <li>爱吃</li>
-            <li>爱吃</li>
-            <li>爱吃</li>
-            <li>爱吃</li>
-            <li>爱吃</li>
-            <li>爱吃</li>
-            <li>爱吃</li>
-            <li>爱吃</li>
-            <li>爱吃</li>
-            <li>爱吃</li>
-            <li>爱吃</li>
-            <li>爱吃</li>
-            <li>爱吃</li>
-            <li>爱吃</li>
-            <li>爱吃</li>
-            <li>爱吃</li>
-            <li>爱吃</li>
-            <li>爱吃</li>
-            <li>爱吃</li>
-            <li>爱吃</li>
-            <li>爱吃</li>
-            <li>爱吃</li>
-            <li>爱吃</li>
-            <li>爱吃</li>
-            <li>爱吃</li>
-            <li>爱吃</li>
-            <li>爱吃</li>
-            <li>爱吃</li>
-            <li>爱吃</li>
+            <li v-for="itemList in item.list" :key="itemList.id">{{itemList.nm}}</li>
           </ul>
         </div>
       </div>
     </div>
     <div class="city_index">
       <ul>
-        <li>A</li>
+        <li
+          v-for="(item,index) in cityList"
+          :key="item.index"
+          @touchstart="handleToIndex(index)"
+        >{{item.index}}</li>
       </ul>
     </div>
   </section>
@@ -58,7 +32,79 @@
 export default {
   name: "city",
   data() {
-    return {};
+    return {
+      cityList: [],
+      hotList: []
+    };
+  },
+  mounted() {
+    this.axios.get("/api/cityList").then(res => {
+      var msg = res.data.msg; //看是否获取到数据。
+      if (msg === "ok") {
+        var cities = res.data.data.cities;
+        //[{ index: "A" }, { list: [{ nm: "阿城", id: 123 }] }];
+        var { cityList, hotList } = this.formatcityList(cities); //整理城市数据的方法。
+        this.cityList = cityList;
+        this.hotList = hotList;
+      }
+    });
+  },
+  methods: {
+    formatcityList(cities) {
+      var cityList = []; //城市列表
+      var hotList = []; //热门城市列表
+
+      for (var i = 0; i < cities.length; i++) {
+        if (cities[i].isHot === 1) {
+          hotList.push(cities[i]);
+        }
+      }
+
+      for (var i = 0; i < cities.length; i++) {
+        var firstLetter = cities[i].py.substring(0, 1).toUpperCase();
+        if (toCom(firstLetter)) {
+          //新添加index
+          cityList.push({
+            index: firstLetter,
+            list: [{ nm: cities[i].nm, id: cities[i].id }]
+          });
+        } else {
+          //累加index中
+          for (var j = 0; j < cityList.length; j++) {
+            if (cityList[j].index === firstLetter) {
+              cityList[j].list.push({ nm: cities[i].nm, id: cities[i].id });
+            }
+          }
+        }
+      }
+      cityList.sort((n1, n2) => {
+        if (n1.index > n2.index) {
+          return 1;
+        } else if (n1.index < n2.index) {
+          return -1;
+        } else {
+          return 0;
+        }
+      });
+      function toCom(firstLetter) {
+        for (var i = 0; i < cityList.length; i++) {
+          //循环进行对比
+          if (cityList[i].index === firstLetter) {
+            return false;
+          }
+        }
+        return true;
+      }
+      return {
+        cityList,
+        hotList
+      };
+    },
+    handleToIndex(index) {
+      //点击索引跳转当前位置
+      var h2 = this.$refs.city_sort.getElementsByTagName("h2");
+      this.$refs.city_sort.parentNode.scrollTop = h2[index].offsetTop;
+    }
   },
   components: {}
 };

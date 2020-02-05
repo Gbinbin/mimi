@@ -1,45 +1,22 @@
 <template>
   <div class="movies_body">
     <ul>
-      <li>
+      <li v-for="item in comingList" :key="item.id">
         <div class="pic_show">
-          <img
-            src="http://p1.meituan.net/128.180/movie/967b253953bc7e660cfadbf9d78f67b62852693.jpg"
-          />
+          <img :src="item.img | setWH('128.80')" />
         </div>
         <div class="info_list">
           <h2>
-            误杀
-            <img src alt />
+            {{ item.nm }}
+            <img v-if="item.version" src="@/assets/max.png" />
           </h2>
           <p>
-            观众评
-            <span class="grade">9.5</span>
+            <span class="person">{{ item.wash }}</span> 人想看
           </p>
-          <p>主演：肖央,谭卓,陈冲</p>
-          <p>今天暂无场次</p>
+          <p>主演：{{ item.star }}</p>
+          <p>{{ item.rt }}</p>
         </div>
-        <div class="btn btn_mall">购票</div>
-      </li>
-      <li>
-        <div class="pic_show">
-          <img
-            src="http://p1.meituan.net/128.180/movie/967b253953bc7e660cfadbf9d78f67b62852693.jpg"
-          />
-        </div>
-        <div class="info_list">
-          <h2>
-            误杀
-            <img src alt />
-          </h2>
-          <p>
-            观众评
-            <span class="grade">9.5</span>
-          </p>
-          <p>主演：肖央,谭卓,陈冲</p>
-          <p>今天暂无场次</p>
-        </div>
-        <div class="btn btn_mall">购票</div>
+        <div class="btn_pre">预售</div>
       </li>
     </ul>
   </div>
@@ -49,9 +26,18 @@
 export default {
   name: "comingSoon",
   data() {
-    return {};
+    return {
+      comingList: []
+    };
   },
-  components: {}
+  mounted() {
+    this.axios.get("/api/movieComingList?cityId=10").then(res => {
+      var msg = res.data.msg;
+      if (msg === "ok") {
+        this.comingList = res.data.data.comingList;
+      }
+    });
+  }
 };
 </script>
 
@@ -59,7 +45,6 @@ export default {
 .movies_body {
   flex: 1;
   overflow: auto;
-  padding-bottom: 45px;
 }
 .movies_body ul {
   margin: 0 12px;
@@ -121,5 +106,17 @@ export default {
   text-align: center;
   background-color: #f90;
   color: #fff;
+}
+.movies_body .btn_mall,
+.movies_body .btn_pre {
+  width: 47px;
+  height: 27px;
+  line-height: 28px;
+  text-align: center;
+  background-color: #f90;
+  color: #fff;
+}
+.movies_body .btn_pre {
+  background: #3c9fe6;
 }
 </style>
