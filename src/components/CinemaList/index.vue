@@ -1,20 +1,21 @@
 <template>
   <div class="cinema_body">
     <ul>
-      <li>
+      <li v-for="item in cinemaList" :key="item.id">
         <div>
-          <span>大地影城(奥东世纪店)</span>
+          <span>{{ item.nm }}</span>
           <span class="q">
-            <span class="price">22.9</span>元起
+            <span class="price">{{ item.sellPrice }}</span>元起
           </span>
         </div>
         <div class="address">
-          <span>这是地址这是地址这是地址这</span>
-          <span>1234.56km</span>
+          <span>{{ item.addr }}</span>
+          <span>{{ item.distance }}</span>
         </div>
         <div class="card">
-          <div>小吃</div>
-          <div>折扣卡</div>
+          <!-- <div>小吃</div>
+          <div>折扣卡</div>-->
+          <div v-for="(num,key) in item.tag" v-if="num===1" :key="key">{{ key | formatCard }}</div>
         </div>
       </li>
     </ul>
@@ -25,9 +26,24 @@
 export default {
   name: "cinemaList",
   data() {
-    return {};
+    return {
+      cinemaList: []
+    };
   },
-  components: {}
+  mounted() {
+    this.axios.get("/api/cinemaList?cityId=10").then(res => {
+      var msg = res.data.msg;
+      console.log(res.data.data.cinemas);
+      if (msg === "ok") {
+        this.cinemaList = res.data.data.cinemas;
+      }
+    });
+  },
+  filters: {
+    formatCard(key) {
+      var card = [{}];
+    }
+  }
 };
 </script>
 
