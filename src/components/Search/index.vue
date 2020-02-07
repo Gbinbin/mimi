@@ -69,7 +69,7 @@ export default {
             console.log("Rquest canceled", err.message); //请求如果被取消，这里是返回取消的message
           } else {
             //handle error
-            console.log(err);
+            //console.log(err);
           }
         });
     }

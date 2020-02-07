@@ -1,8 +1,9 @@
 <template>
-  <div class="movies_body">
+  <div class="movies_body" ref="movie_body">
     <ul>
+      <li>{{ pullDownMsg }}</li>
       <li v-for="item in movieList" :key="item.id">
-        <div class="pic_show">
+        <div class="pic_show" @tap="handleToDetail">
           <img :src="item.img | setWH('128.180')" />
         </div>
         <div class="info_list">
@@ -24,11 +25,13 @@
 </template>
 
 <script>
+import BScroll from "better-scroll";
 export default {
   name: "playingNow",
   data() {
     return {
-      movieList: []
+      movieList: [],
+      pullDownMsg: ""
     };
   },
   mounted() {
@@ -36,8 +39,45 @@ export default {
       var msg = res.data.msg;
       if (msg === "ok") {
         this.movieList = res.data.data.movieList;
+        this.$nextTick(() => {
+          //上面的数据加载完成后，才能触发的函数。
+          var scroll = new BScroll(this.$refs.movie_body, {
+            //添加better-scroll插件事件
+            tap: true, //允许tap事件发生
+            probeType: 1 //添加scroll事件，并且节流。
+          });
+          scroll.on("scroll", pos => {
+            //下拉触发的函数
+
+            //console.log("scroll");
+            if (pos.y > 30) {
+              this.pullDownMsg = "正在更新中";
+            }
+          });
+          scroll.on("touchEnd", pos => {
+            //下拉结束触发的函数
+            //console.log("touchEnd");
+            if (pos.y > 30) {
+              this.axios.get("/api/movieOnInfoList?cityId=100").then(res => {
+                var msg = res.data.msg;
+                if (msg === "ok") {
+                  this.pullDownMsg = "更新成功";
+                  setTimeout(() => {
+                    this.movieList = res.data.data.movieList;
+                    this.pullDownMsg = "";
+                  }, 1000);
+                }
+              });
+            }
+          });
+        });
       }
     });
+  },
+  methods: {
+    handleToDetail() {
+      console.log("handleToDetail");
+    }
   }
 };
 </script>
